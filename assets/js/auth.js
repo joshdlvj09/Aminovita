@@ -19,6 +19,9 @@ function validarEstadoSesion() {
     const divSiLogin = document.getElementById('botones-si-login');
     const spanNombre = document.getElementById('usuario-nombre');
     const btnAdmin = document.getElementById('btnAdminAgregar');
+    
+    // 👇 NUEVA REFERENCIA: El botón del dropdown de proveedores 👇
+    const menuProveedores = document.getElementById('menuAdminProveedores');
 
     // --- ESCENARIO 1: USUARIO LOGUEADO (HAY TOKEN) ---
     if (token) {
@@ -34,13 +37,15 @@ function validarEstadoSesion() {
             spanNombre.textContent = usuarioNombre;
         }
 
-        // 3. Mostrar botón Admin si corresponde
-        if (btnAdmin) {
-            if (usuarioRol === 'admin') {
-                btnAdmin.classList.remove('d-none');
-            } else {
-                btnAdmin.classList.add('d-none');
-            }
+        // 3. Mostrar herramientas de Admin si corresponde ('admin')
+        if (usuarioRol === 'admin') {
+            if (btnAdmin) btnAdmin.classList.remove('d-none');
+            // 👇 Si es admin, mostramos el acceso a proveedores en el dropdown 👇
+            if (menuProveedores) menuProveedores.classList.remove('d-none');
+        } else {
+            if (btnAdmin) btnAdmin.classList.add('d-none');
+            // 👇 Si está logueado pero NO es admin, lo ocultamos por seguridad 👇
+            if (menuProveedores) menuProveedores.classList.add('d-none');
         }
     } 
     // --- ESCENARIO 2: USUARIO NO LOGUEADO ---
@@ -51,6 +56,9 @@ function validarEstadoSesion() {
         }
         if (divNoLogin) divNoLogin.classList.remove('d-none');
         if (btnAdmin) btnAdmin.classList.add('d-none');
+        
+        // 👇 Si no hay sesión iniciada, ocultamos el acceso a proveedores 👇
+        if (menuProveedores) menuProveedores.classList.add('d-none');
     }
 }
 

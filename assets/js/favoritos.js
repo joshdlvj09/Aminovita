@@ -1,5 +1,5 @@
 /* =====================================================
-   AMINOVITA - Lógica de Mis Favoritos
+   AMINOVITA - Lógica de Mis Favoritos (Materia Prima)
    Página: favoritos.html
    ===================================================== */
 
@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 
-/* ── CARGAR FAVORITOS ─────────────────────────────── */
+/* ── CARGAR FAVORITOS (CON NUEVOS ICONOS Y BORDES) ── */
 
 async function cargarFavoritos() {
     const contenedor   = document.getElementById('contenedor-favoritos');
@@ -62,30 +62,51 @@ async function cargarFavoritos() {
             return;
         }
 
+        estadoVacio.classList.add('d-none');
+
         productos.forEach(prod => {
             if (!prod) return;
 
+            // 🛠️ MAPEAR CLASES VISUALES E ICONOS POR CATEGORÍA (IGUAL AL CATÁLOGO)
+            let claseCat = 'border-secondary';
+            let icono = 'bi-box-seam';
+            const categoria = prod.categoria ? prod.categoria.toLowerCase() : '';
+
+            if (categoria.includes('farma')) {
+                claseCat = 'cat-farmaceutica';
+                icono = 'bi-capsule';
+            } else if (categoria.includes('alim')) {
+                claseCat = 'cat-alimentos';
+                icono = 'bi-egg-fried';
+            } else if (categoria.includes('cosm')) {
+                claseCat = 'cat-cosmetica';
+                icono = 'bi-stars';
+            }
+
+            // Inyectamos las tarjetas interactivas alineadas a la grilla Bootstrap en fila d-flex
             contenedor.innerHTML += `
-                <div class="col-12 col-md-4 mb-4" id="card-${prod._id}">
-                    <div class="card h-100 shadow-sm border-0 position-relative">
+                <div class="col-12 col-md-6 col-lg-4 mb-3" id="card-${prod._id}">
+                    <div class="item-producto p-3 d-flex align-items-center justify-content-between position-relative h-100 ${claseCat}">
+                        
+                        <div class="d-flex align-items-center gap-3 style="cursor: pointer;" onclick="verDetallesCliente('${prod._id}')">
+                            <div class="icono-cat">
+                                <i class="bi ${icono}"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1 fs-6 text-uppercase" style="letter-spacing: 0.5px;">${prod.titulo}</h5>
+                                <span class="text-muted small">${prod.categoria || 'Uso General'}</span>
+                            </div>
+                        </div>
 
-                        <button onclick="quitarFavorito('${prod._id}')"
-                            class="btn btn-light rounded-circle shadow-sm position-absolute top-0 end-0 m-2"
-                            title="Quitar de favoritos"
-                            style="z-index:10; width:40px; height:40px; display:flex; align-items:center; justify-content:center;">
-                            <i class="bi bi-heart-fill text-danger fs-5"></i>
-                        </button>
-
-                        <img src="${prod.imagen}" class="card-img-top" alt="${prod.titulo}"
-                            style="height: 200px; object-fit: cover;">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title fw-bold">${prod.titulo}</h5>
-                            <p class="card-text text-truncate text-muted">${prod.descripcion}</p>
-                            <button onclick="verDetallesCliente('${prod._id}')"
-                                class="btn btn-outline-primary btn-sm mt-auto">
-                                Ver Detalles
+                        <div class="d-flex align-items-center gap-1 pe-1">
+                            <button onclick="quitarFavorito('${prod._id}')" 
+                                    class="btn btn-sm btn-outline-light border-0 text-danger" 
+                                    title="Quitar de favoritos"
+                                    style="width: 36px; height: 36px; display: flex; align-items: center; justify-content: center;">
+                                <i class="bi bi-heart-fill fs-5"></i>
                             </button>
                         </div>
+
                     </div>
                 </div>
             `;
@@ -93,12 +114,12 @@ async function cargarFavoritos() {
 
     } catch (error) {
         console.error(error);
-        contenedor.innerHTML = '<div class="col-12 text-center text-danger"><p>Error al cargar tus favoritos.</p></div>';
+        contenedor.innerHTML = '<div class="col-12 text-center text-danger py-4"><i class="bi bi-exclamation-triangle fs-3"></i><p class="mt-2">Error al cargar tus favoritos de Aminovita.</p></div>';
     }
 }
 
 
-/* ── VER DETALLES (MODAL) ─────────────────────────── */
+/* ── VER DETALLES (MODAL ADAPTADO SIN IMAGEN) ─────── */
 
 async function verDetallesCliente(idProducto) {
     try {
@@ -110,9 +131,10 @@ async function verDetallesCliente(idProducto) {
 
         const prod = await res.json();
 
-        document.getElementById('clienteModalImg').src         = prod.imagen;
-        document.getElementById('clienteModalTitulo').innerText = prod.titulo;
-        document.getElementById('clienteModalDesc').innerText   = prod.descripcion;
+        // 🛠️ CORREGIDO: Inyectamos los textos directamente. Ya no se busca 'clienteModalImg'
+        document.getElementById('clienteModalCategoria').innerText = prod.categoria || 'Uso General';
+        document.getElementById('clienteModalTitulo').innerText    = prod.titulo;
+        document.getElementById('clienteModalDesc').innerText      = prod.descripcion;
 
         const modal = new bootstrap.Modal(document.getElementById('modalDetallesCliente'));
         modal.show();
@@ -127,11 +149,13 @@ async function verDetallesCliente(idProducto) {
 /* ── QUITAR FAVORITO ──────────────────────────────── */
 
 async function quitarFavorito(idProducto) {
-    // 1. Efecto visual inmediato (la card se encoge)
+    // 1. Efecto visual inmediato (la card se remueve suavemente)
     const card = document.getElementById(`card-${idProducto}`);
     if (card) {
-        card.classList.add('fade-out');
-        setTimeout(() => card.remove(), 500);
+        card.style.transition = 'all 0.3s ease';
+        card.style.opacity = '0';
+        card.style.transform = 'scale(0.9)';
+        setTimeout(() => card.remove(), 300);
     }
 
     Toast.fire({ icon: 'info', title: 'Eliminado de favoritos' });
@@ -147,13 +171,14 @@ async function quitarFavorito(idProducto) {
             body: JSON.stringify({ productoId: idProducto })
         });
 
-        // 3. Mostrar estado vacío si no quedan favoritos
+        // 3. Mostrar estado vacío si no quedan favoritos en la vista
         const contenedor = document.getElementById('contenedor-favoritos');
         setTimeout(() => {
-            if (contenedor.children.length === 0) {
+            // Evaluamos si el contenedor quedó limpio de tarjetas
+            if (!contenedor.querySelector('.item-producto')) {
                 document.getElementById('estado-vacio').classList.remove('d-none');
             }
-        }, 550);
+        }, 350);
 
     } catch (error) {
         console.error('Error al eliminar favorito:', error);

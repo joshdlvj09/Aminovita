@@ -8,7 +8,6 @@ const app = express();
 // --- 1. MIDDLEWARES (Configuraciones) ---
 app.use(cors()); 
 
-// 👇👇 AQUÍ ESTÁ EL CAMBIO CLAVE 👇👇
 // Aumentamos el límite a 50mb para que quepan las imágenes en texto (Base64)
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
@@ -24,12 +23,13 @@ mongoose.connect(process.env.MONGO_URI || 'mongodb://localhost:27017/aminovita')
 app.use('/api/auth', require('./routes/authRoutes'));
 
 // B. Productos (Catálogo y Administración)
-// Asegúrate de que el archivo en la carpeta 'routes' se llame 'productoRoutes.js'
 app.use('/api/productos', require('./routes/productoRoutes')); 
 
-// C. Contacto
-// (Si ya tienes el archivo listo, descomenta la siguiente línea)
-// app.use('/api/contacto', require('./routes/contacto'));
+// C. Contacto 👇 ¡ACTIVADO Y DESCOMENTADO AQUÍ! 👇
+app.use('/api/contacto', require('./routes/contacto'));
+
+// D. Proveedores (Administración Privada)
+app.use('/api/proveedores', require('./routes/proveedores'));
 
 
 // --- 4. ARRANCAR SERVIDOR ---

@@ -1,3 +1,8 @@
+// =======================================================
+// CONTROLADOR DE AUTENTICACIÓN Y USUARIOS
+// Archivo: backend/controllers/authController.js
+// =======================================================
+
 const User = require('../models/user');
 const Verification = require('../models/Verification');
 const Product = require('../models/product'); 
@@ -224,7 +229,9 @@ exports.guardarNuevoPassword = async (req, res) => {
     }
 };
 
-
+// =======================================================
+// 6. TOGGLE FAVORITOS (AGREGAR / REMOVER)
+// =======================================================
 exports.toggleFavorito = async (req, res) => {
     const { productoId } = req.body;
     const usuarioId = req.usuario.id; 
@@ -245,15 +252,39 @@ exports.toggleFavorito = async (req, res) => {
     }
 };
 
+// =======================================================
+// 7. OBTENER FAVORITOS (CORREGIDO PARA EVITAR ERROR 500)
+// =======================================================
 exports.obtenerFavoritos = async (req, res) => {
     try {
-        const user = await User.findById(req.usuario.id).populate('favoritos');
-        res.json(user.favoritos); 
+        // Buscamos al usuario usando el ID inyectado por el token JWT
+        const user = await User.findById(req.usuario.id);
+        
+        if (!user) {
+            return res.status(404).json({ msg: 'Usuario no encontrado' });
+        }
+
+        // 🛠️ CORRECCIÓN: Vinculamos explícitamente la referencia al modelo cargado 'Product'
+        await user.populate({
+            path: 'favoritos',
+            model: Product
+        });
+
+        // Aseguramos responder con una lista limpia si no hay datos guardados aún
+        const misFavoritos = user.favoritos || [];
+        res.json(misFavoritos); 
+
     } catch (error) {
-        res.status(500).json({ msg: 'Error favoritos' });
+        console.error("Error crítico en obtenerFavoritos:", error);
+        res.status(500).json({ 
+            msg: 'Error interno en el servidor al procesar el catálogo de favoritos.' 
+        });
     }
 };
 
+// =======================================================
+// 8. OBTENER INFORMACIÓN DEL PERFIL
+// =======================================================
 exports.obtenerPerfil = async (req, res) => {
     try {
         const user = await User.findById(req.usuario.id).select('-password');

@@ -100,7 +100,6 @@ async function cargarDatosProducto() {
         document.getElementById('editImgUrl').value   = prod.imagen;
         document.getElementById('imgPreview').src     = prod.imagen;
         document.getElementById('idProd').value       = prod._id;
-        document.getElementById('notas').value        = prod.notas || '';
 
         const fechaObj = new Date(prod.fecha);
         document.getElementById('fecha').value = fechaObj.toLocaleDateString();
@@ -139,8 +138,7 @@ document.getElementById('formEditar').addEventListener('submit', async (e) => {
         const datosActualizados = {
             titulo:      document.getElementById('titulo').value,
             descripcion: document.getElementById('descripcion').value,
-            imagen:      imagenFinal,
-            notas:       document.getElementById('notas').value
+            imagen:      imagenFinal
         };
 
         const res = await fetch(`http://localhost:4000/api/productos/${productoId}`, {

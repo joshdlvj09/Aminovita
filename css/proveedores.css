@@ -1,0 +1,53 @@
+html { 
+    background-color: #f8f9fa; 
+}
+
+body { 
+    background-color: #f8f9fa; 
+    min-height: 100vh; 
+}
+
+/* Animación de entrada fluida */
+@keyframes softFade {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.body-interno { 
+    animation: softFade 0.6s ease-out forwards; 
+    opacity: 0; 
+}
+
+.footer-link { 
+    text-decoration: none; 
+    color: #6c757d; 
+    transition: color 0.2s; 
+}
+
+.footer-link:hover { 
+    color: #2c3e50; 
+}
+
+/* Tarjetas ejecutivas de Proveedores */
+.tarjeta-proveedor {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+}
+
+.tarjeta-proveedor:hover {
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+    transform: translateY(-2px);
+}
+
+/* Badges estilizados para los productos químicos */
+.badge-producto {
+    font-size: 0.75rem;
+    background-color: #e9ecef;
+    color: #495057;
+    border-radius: 20px;
+    padding: 4px 10px;
+    display: inline-block;
+    margin: 2px;
+}

@@ -224,3 +224,20 @@ body::after {
     color: #8daab9;
     font-size: 0.85rem;
 }
+
+/* Integración limpia para selectores múltiples */
+select.custom-input {
+    background-image: none !important;
+    padding: 5px !important;
+}
+select.custom-input option {
+    background-color: #ffffff;
+    color: #0b2639;
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 2px;
+}
+select.custom-input option:checked {
+    background: linear-gradient(90deg, #8A8AF6 0%, #6CDBE3 100%) !important;
+    color: white !important;
+}
