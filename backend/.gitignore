@@ -1,0 +1,24 @@
+# --- DEPENDENCIAS (Muy pesadas, nunca se suben) ---
+node_modules/
+
+# --- SECRETOS Y SEGURIDAD (¡Lo más importante!) ---
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# --- LOGS (Archivos de errores que ensucian) ---
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs
+*.log
+
+# --- SISTEMA OPERATIVO (Archivos basura de Mac y Windows) ---
+.DS_Store
+Thumbs.db
+
+# --- EDITORES DE CÓDIGO (Configuraciones personales) ---
+.vscode/
+.idea/
