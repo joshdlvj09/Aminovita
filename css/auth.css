@@ -1,0 +1,226 @@
+/* =====================================================
+   AMINOVITA - Estilos de Páginas de Autenticación
+   Aplica a: login.html y registro.html
+   ===================================================== */
+
+
+/* ── FONDO ────────────────────────────────────────── */
+
+body, html {
+    height: 100%;
+    margin: 0;
+    /* Degradado sutil del lila claro al menta claro */
+    background: linear-gradient(135deg, #f3f6fb 0%, #e8fbf9 100%);
+    color: #333;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Elementos decorativos de fondo */
+body::before {
+    content: '';
+    position: absolute;
+    top: -10%; right: -10%;
+    width: 500px; height: 500px;
+    background: radial-gradient(circle, rgba(108, 219, 227, 0.1) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    bottom: -5%; left: -5%;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(138, 138, 246, 0.1) 0%, rgba(255,255,255,0) 70%);
+    border-radius: 50%;
+    z-index: -1;
+}
+
+
+/* ── NAVBAR ───────────────────────────────────────── */
+
+.navbar {
+    background-color: transparent !important;
+    padding-top: 20px;
+}
+
+.navbar-brand {
+    color: #0b2639 !important;
+    font-weight: bold;
+    letter-spacing: -0.5px;
+}
+
+
+/* ── TARJETA PRINCIPAL ────────────────────────────── */
+
+.login-card {
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(11, 38, 57, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    overflow: hidden;
+    position: relative;
+}
+
+/* Barra decorativa superior con gradiente del logo */
+.login-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 6px;
+    background: linear-gradient(90deg, #8A8AF6 0%, #6CDBE3 100%);
+    z-index: 10;
+}
+
+.login-title {
+    color: #0b2639;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 10px;
+}
+
+.login-subtitle {
+    color: #8daab9;
+    font-size: 0.95rem;
+    margin-bottom: 30px;
+}
+
+
+/* ── INPUTS ───────────────────────────────────────── */
+
+.custom-input-group {
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    border: 1px solid #e1e8ed;
+    margin-bottom: 20px;
+    padding: 5px 15px;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.custom-input-group:focus-within {
+    background-color: #fff;
+    border-color: #8A8AF6;
+    box-shadow: 0 4px 12px rgba(138, 138, 246, 0.15);
+}
+
+.custom-input {
+    background: transparent !important;
+    border: none !important;
+    color: #0b2639 !important;
+    box-shadow: none !important;
+    padding-left: 10px;
+    font-weight: 500;
+}
+
+.custom-input::placeholder {
+    color: #aebdc5;
+    font-weight: 400;
+}
+
+.input-icon {
+    color: #8A8AF6;
+    font-size: 1.1rem;
+}
+
+/* En registro, los iconos usan el color menta */
+.icon-menta {
+    color: #6CDBE3;
+}
+
+
+/* ── BOTÓN PRINCIPAL ──────────────────────────────── */
+
+.btn-glow {
+    width: 100%;
+    border-radius: 12px;
+    padding: 14px;
+    border: none;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    background: linear-gradient(90deg, #8A8AF6 0%, #6CDBE3 100%);
+    box-shadow: 0 4px 15px rgba(138, 138, 246, 0.3);
+    transition: all 0.3s ease;
+}
+
+.btn-glow:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(108, 219, 227, 0.4);
+    background: linear-gradient(90deg, #7878ea 0%, #5bcdd6 100%);
+}
+
+
+/* ── BOTÓN "ENVIAR CÓDIGO" (solo en registro) ─────── */
+
+.btn-code {
+    border: 1px solid #8A8AF6;
+    color: #8A8AF6;
+    background: white;
+    border-radius: 8px;
+    font-size: 0.75rem;
+    padding: 6px 12px;
+    font-weight: 600;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-code:hover {
+    background: #8A8AF6;
+    color: white;
+}
+
+.btn-code:disabled {
+    border-color: #ccc;
+    color: #999;
+    background: #f0f0f0;
+}
+
+
+/* ── LINKS ────────────────────────────────────────── */
+
+.small-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s;
+}
+
+.small-link:hover {
+    color: #8A8AF6;
+}
+
+
+/* ── VALIDACIONES ─────────────────────────────────── */
+
+.was-validated .custom-input:invalid {
+    border-bottom: none !important;
+}
+
+.invalid-feedback {
+    position: absolute;
+    bottom: -20px;
+    left: 10px;
+    font-size: 0.75rem;
+    color: #ff6b6b;
+}
+
+
+/* ── ANIMACIÓN DE ENTRADA ─────────────────────────── */
+
+@keyframes entradaSuave {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0);    }
+}
+
+.contenido-animado {
+    animation: entradaSuave 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+
+/* ── FOOTER ───────────────────────────────────────── */
+
+.footer-text {
+    color: #8daab9;
+    font-size: 0.85rem;
+}

@@ -1,0 +1,55 @@
+/* =====================================================
+   AMINOVITA - Estilos de Restablecer Contraseña
+   Aplica a: reset.html
+   ===================================================== */
+
+
+/* ── FONDO ────────────────────────────────────────── */
+
+body {
+    background-color: #0b2639;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+
+/* ── TARJETA ──────────────────────────────────────── */
+
+.card {
+    background-color: #0e3047;
+    border: none;
+    color: white;
+}
+
+
+/* ── INPUTS ───────────────────────────────────────── */
+
+.form-control {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid #4a6b7c;
+    color: white;
+}
+
+.form-control:focus {
+    background: transparent;
+    color: white;
+    box-shadow: none;
+    border-color: #2a8a58;
+}
+
+
+/* ── BOTÓN ────────────────────────────────────────── */
+
+.btn-glow {
+    background: radial-gradient(circle, #2a8a58 0%, #10412e 100%);
+    border: none;
+    width: 100%;
+    padding: 10px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+}

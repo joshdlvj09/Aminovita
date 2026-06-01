@@ -1,0 +1,17 @@
+/* =====================================================
+   AMINOVITA - Estilos del Catálogo de Productos
+   Aplica a: productos.html
+   ===================================================== */
+
+
+/* ── ANIMACIÓN LIKE (CORAZÓN) ─────────────────────── */
+
+.heart-bounce {
+    animation: bounce 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes bounce {
+    0%   { transform: scale(1);   }
+    50%  { transform: scale(1.3); }
+    100% { transform: scale(1);   }
+}

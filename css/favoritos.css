@@ -1,0 +1,18 @@
+/* =====================================================
+   AMINOVITA - Estilos de Favoritos
+   Aplica a: favoritos.html
+   ===================================================== */
+
+
+/* ── ANIMACIÓN QUITAR FAVORITO ────────────────────── */
+
+.fade-out {
+    animation: fadeOut 0.5s forwards;
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+}

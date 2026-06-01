@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Cuenta - Aminovita</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="stylesheet" href="../css/auth.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link rel="icon" href="../assets/img/iconos/AMINOVITA_A.png" type="image/png">
+</head>
+
+<body class="d-flex flex-column vh-100">
+
+<nav class="navbar navbar-expand-lg">
+      <div class="container-fluid px-4">
+        <a class="navbar-brand p-0" href="./index.html">
+            <img src="../assets/img/iconos/AQ1.png" alt="Aminovita Logo" class="img-fluid" style="height: 60px; width: auto;">
+        </a>
+        <div class="d-flex">
+            <a href="./index.html" class="btn btn-outline-secondary btn-sm rounded-pill px-4 border-2 fw-bold" style="color: #6c757d; border-color: #e1e8ed;">
+                CANCELAR
+            </a>
+        </div>
+      </div>
+    </nav>
+
+    <div class="flex-grow-1 d-flex justify-content-center align-items-center p-3">
+        <div class="row w-100 justify-content-center">
+            
+            <div class="col-12 col-md-6 col-lg-5 col-xl-4 contenido-animado">
+                
+                <div class="login-card p-4 p-md-5">
+                    
+                    <div class="text-center">
+                        <h2 class="login-title">Crear nueva cuenta</h2>
+                    </div>
+                
+                    <form id="registroForm" class="needs-validation" novalidate>
+    
+                        <div class="custom-input-group d-flex align-items-center">
+                            <i class="fa-regular fa-user input-icon ps-2"></i>
+                            <input class="form-control custom-input" type="text" id="nombre" placeholder="Nombre Completo" required>
+                            <div class="invalid-feedback">Ingresa tu nombre.</div>
+                        </div>
+
+                        <div class="custom-input-group d-flex align-items-center">
+                            <i class="fa-regular fa-building input-icon ps-2"></i>
+                            <input class="form-control custom-input" type="text" id="empresa" placeholder="Empresa (Opcional)">
+                        </div>
+
+                        <div class="custom-input-group d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center w-100">
+                                <i class="fa-regular fa-envelope input-icon ps-2"></i>
+                                <input class="form-control custom-input" type="email" id="email" placeholder="Correo electrónico" required>
+                            </div>
+                            <button type="button" class="btn-code ms-2" id="btnEnviarCodigo" onclick="enviarCodigo()">
+                                Enviar Código
+                            </button>
+                            <div class="invalid-feedback">Ingresa un correo válido.</div>
+                        </div>
+
+                        <div id="campoCodigo" class="d-none animate__animated animate__fadeIn">
+                            <div class="custom-input-group d-flex align-items-center" style="border-color: #6CDBE3; background-color: #f0fdfc;">
+                                <i class="fa-solid fa-key input-icon ps-2 text-primary"></i>
+                                <input class="form-control custom-input" type="text" id="codigo" placeholder="Código de 6 dígitos" maxlength="6">
+                                <div class="invalid-feedback">El código es obligatorio.</div>
+                            </div>
+                            <p class="small text-success ms-2 mb-3"><i class="fa-solid fa-check-circle me-1"></i> Código enviado. Revisa tu bandeja.</p>
+                        </div>
+
+                        <div class="custom-input-group d-flex align-items-center">
+                            <i class="fa-solid fa-lock input-icon ps-2"></i>
+                            <input class="form-control custom-input" type="password" id="password" placeholder="Crear contraseña" minlength="6" required>
+                            <div class="invalid-feedback">Mínimo 6 caracteres.</div>
+                        </div>
+                        
+                        <div class="mt-4 mb-3">
+                            <button type="submit" class="btn btn-glow">
+                                REGISTRARSE
+                            </button>
+                        </div>
+
+                        <div class="text-center">
+                            <span style="color: #6c757d; font-size: 0.9rem;">¿Ya tienes cuenta?</span>
+                            <a href="./login.html" class="fw-bold text-decoration-none ms-1" style="color: #8A8AF6;">Inicia Sesión</a>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid py-3 mt-auto">
+        <div class="row">
+            <div class="col-12 text-center footer-text">
+                <p class="m-0">
+                    &copy; 2026 Aminovita y Químicos.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts propios -->
+    <script src="../assets/js/registro.js"></script>
+
+</body>
+</html>
