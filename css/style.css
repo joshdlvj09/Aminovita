@@ -81,3 +81,20 @@ body {
         height: 300px;
     }
 }
+
+
+/* ── 🛠️ BLINDAJE CONTRA TEXTOS LARGOS EN TARJETAS (NUEVO) ── */
+
+/* Fuerza al contenedor flexible central a contraerse en lugar de expandirse al infinito */
+.item-producto .flex-grow-1 {
+    min-width: 0 !important;
+}
+
+/* Aplica el efecto de recorte y añade los puntos suspensivos (...) a las industrias */
+.item-producto small.text-muted {
+    display: block !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}

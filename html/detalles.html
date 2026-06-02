@@ -79,7 +79,7 @@
         <div class="d-flex justify-content-between align-items-center mb-4">
             <div>
                 <h2 class="display-6 fw-bold" style="color: #0b2639;">Administrar Producto</h2>
-                <p class="text-muted">Edita la información básica o la categoría del compuesto.</p>
+                <p class="text-muted">Edita la información básica o las categorías del compuesto.</p>
             </div>
             <a href="./productos.html" class="btn btn-outline-dark rounded-pill fw-bold">
                 <i class="bi bi-arrow-left me-2"></i> Volver al Catálogo
@@ -101,13 +101,37 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3">
-                                    <label class="form-label small fw-bold text-muted text-uppercase">Sector / Industria</label>
-                                    <select class="form-select bg-light border-0" id="categoria" required>
-                                        <option value="Farmacéutica">Industria Farmacéutica</option>
-                                        <option value="Alimentos">Industria Alimentaria</option>
-                                        <option value="Cosmética">Industria Cosmética</option>
-                                        <option value="General">Uso General / Otros</option>
-                                    </select>
+                                    <label class="form-label small fw-bold text-muted text-uppercase d-block">Sector / Industria (Selección Múltiple)</label>
+                                    
+                                    <div class="p-3 bg-light rounded" id="categoria-contenedor" style="max-height: 160px; overflow-y: auto; border: 1px solid #e3e3e3;">
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Farmacéutica" id="cat-farma">
+                                            <label class="form-check-label small" for="cat-farma">Industria Farmacéutica</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Alimentos" id="cat-alimentos">
+                                            <label class="form-check-label small" for="cat-alimentos">Industria Alimentaria</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Cosmética" id="cat-cosmetica">
+                                            <label class="form-check-label small" for="cat-cosmetica">Industria Cosmética</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Veterinaria" id="cat-veterinaria">
+                                            <label class="form-check-label small" for="cat-veterinaria">Industria Veterinaria</label>
+                                        </div>
+                                        <div class="form-check mb-2">
+                                            <input class="form-check-input" type="checkbox" value="Agroquímico" id="cat-agroquimico">
+                                            <label class="form-check-label small" for="cat-agroquimico">Agroquímico</label>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" value="General" id="cat-general">
+                                            <label class="form-check-label small" for="cat-general">Uso General / Otros</label>
+                                        </div>
+                                    </div>
+                                    <div class="text-danger small d-none mt-1" id="error-categoria">
+                                        <i class="bi bi-exclamation-circle-fill me-1"></i> Debes seleccionar al menos un sector.
+                                    </div>
                                 </div>
                             </div>
 
@@ -234,13 +258,23 @@
                 const prod = await res.json();
 
                 document.getElementById('titulo').value = prod.titulo;
-                document.getElementById('categoria').value = prod.categoria || 'General';
                 document.getElementById('descripcion').value = prod.descripcion;
-                
                 document.getElementById('idProd').value = prod._id;
 
                 const fechaObj = new Date(prod.fecha);
                 document.getElementById('fecha').value = fechaObj.toLocaleDateString();
+
+                // --- MANEJO DE CATEGORÍAS MÚLTIPLES ---
+                // Si la base de datos trae un Array lo lee directamente, si trae un String (antiguo), lo mete en un array temporal.
+                const categoriasProd = Array.isArray(prod.categoria) ? prod.categoria : [prod.categoria];
+                
+                // Mapear y activar los checkboxes que correspondan con los datos del backend
+                const checkboxes = document.querySelectorAll('#categoria-contenedor .form-check-input');
+                checkboxes.forEach(checkbox => {
+                    if (categoriasProd.includes(checkbox.value)) {
+                        checkbox.checked = true;
+                    }
+                });
 
             } catch (error) {
                 console.error(error);
@@ -251,6 +285,21 @@
         // --- GUARDAR CAMBIOS ---
         document.getElementById('formEditar').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Recopilar los checkboxes seleccionados en un Array
+            const checkboxesSeleccionados = document.querySelectorAll('#categoria-contenedor .form-check-input:checked');
+            const categoriasArray = Array.from(checkboxesSeleccionados).map(cb => cb.value);
+            const errorCategorias = document.getElementById('error-categoria');
+
+            // Validación: Prevenir que el producto se quede sin categorías
+            if (categoriasArray.length === 0) {
+                errorCategorias.classList.remove('d-none');
+                document.getElementById('categoria-contenedor').style.borderColor = '#dc3545';
+                return;
+            } else {
+                errorCategorias.classList.add('d-none');
+                document.getElementById('categoria-contenedor').style.borderColor = '#e3e3e3';
+            }
             
             if (!document.getElementById('formEditar').checkValidity()) {
                 e.stopPropagation();
@@ -263,7 +312,7 @@
             try {
                 const datosActualizados = {
                     titulo: document.getElementById('titulo').value,
-                    categoria: document.getElementById('categoria').value,
+                    categoria: categoriasArray, // Enviamos el array completo al backend
                     descripcion: document.getElementById('descripcion').value
                 };
 
