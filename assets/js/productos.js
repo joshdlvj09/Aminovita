@@ -97,6 +97,9 @@ function renderizarProductos(productos) {
     const estaLogueado = !!localStorage.getItem('token');
     const esAdmin = localStorage.getItem('usuarioRol') === 'admin'; 
 
+    // 🚀 OPTIMIZACIÓN: Variable intermedia para acumular el HTML en memoria
+    let htmlAcumulado = '';
+
     productos.forEach(prod => {
         const esFavorito = misFavoritos.includes(prod._id);
         const iconoHeart = esFavorito ? 'bi-heart-fill text-danger' : 'bi-heart';
@@ -108,12 +111,10 @@ function renderizarProductos(productos) {
         let iconCat = 'bi-box-seam';
 
         // --- LÓGICA DINÁMICA DE CATEGORÍA ---
-        // Si hay más de una categoría Y no estamos filtrando por una en específico, estilo "Varios"
         if (categoriasArray.length > 1 && categoriaActual === '') {
             claseCat = 'cat-varios';
             iconCat = 'bi-layers-half'; 
         } else {
-            // Evaluamos la categoría activa o la primera del producto
             const catEval = (categoriaActual !== '') ? categoriaActual.toLowerCase() : categoriasArray.join(' ').toLowerCase();
             
             if (catEval.includes('farma')) { 
@@ -131,7 +132,8 @@ function renderizarProductos(productos) {
 
         const textoCategorias = categoriasArray.join(' | ');
 
-        const html = `
+        // Acumulamos el string en lugar de insertarlo directamente al DOM
+        htmlAcumulado += `
         <div class="col-12 col-md-6 col-xl-4">
             <div class="item-producto ${claseCat} p-3 d-flex align-items-center position-relative" style="min-height: 90px;">
                 ${estaLogueado ? `
@@ -158,8 +160,10 @@ function renderizarProductos(productos) {
             </div>
         </div>
         `;
-        contenedor.innerHTML += html;
     });
+
+    // 🚀 UNA SOLA INYECCIÓN: Pintamos todo el catálogo de un solo golpe
+    contenedor.innerHTML = htmlAcumulado;
 }
 
 // --- VER DETALLES ---
@@ -204,6 +208,8 @@ function renderizarPaginacion(total, actual) {
     paginacion.innerHTML = '';
     if(total <= 1) return; 
     
+    // Aquí se mantiene con += temporalmente porque son pocos elementos de paginación, 
+    // pero el core de la inyección masiva (los productos) ya quedó blindado.
     paginacion.innerHTML += `<li class="page-item ${actual===1?'disabled':''}"><button class="page-link shadow-none text-dark" onclick="cambiarPagina(${actual-1})">&laquo;</button></li>`;
     for(let i=1; i<=total; i++) {
         paginacion.innerHTML += `<li class="page-item ${i===actual?'active':''}"><button class="page-link shadow-none ${i===actual?'bg-dark border-dark':''}" onclick="cambiarPagina(${i})">${i}</button></li>`;
@@ -218,7 +224,6 @@ function inicializarFormularioProducto() {
     const formProducto = document.getElementById('formProducto');
     if (!formProducto) return;
 
-    // Removemos cualquier listener previo duplicado para evitar doble peticion
     formProducto.replaceWith(formProducto.cloneNode(true));
     
     const formFiltrado = document.getElementById('formProducto');
@@ -231,7 +236,6 @@ function inicializarFormularioProducto() {
             return; 
         }
 
-        // Corrección del Scope: Buscamos los checkboxes específicamente encasillados en este formulario
         const categoriasMarcadas = Array.from(formFiltrado.querySelectorAll('.chk-categoria-prod:checked')).map(chk => chk.value);
         
         if (categoriasMarcadas.length === 0) {

@@ -39,6 +39,24 @@ const ProveedorSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Product' // 👈 CAMBIADO A 'Product' para coincidir exactamente con tu modelo
     }],
+    // 👇 NUEVOS CAMPOS ADICIONALES Y FISCALES (OPCIONALES) 👇
+    emailSecundario: {
+        type: String,
+        trim: true,
+        lowercase: true,
+        default: ''
+    },
+    telefonoSecundario: {
+        type: String,
+        trim: true,
+        default: ''
+    },
+    rfc: {
+        type: String,
+        trim: true,
+        uppercase: true, // Forzar almacenamiento en mayúsculas a nivel base de datos
+        default: ''
+    },
     fechaCreacion: {
         type: Date,
         default: Date.now

@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <link rel="icon" href="../assets/img/iconos/AMINOVITA_A.png" type="png">
+    <link rel="icon" href="../assets/img/iconos/AMINOVITA_A.png" type="image/png">
 
     <style>
         .cat-farmaceutica { border-left: 4px solid #8A8AF6 !important; }
@@ -98,7 +98,6 @@
                 <h2 class="display-6 fw-bold" style="color: #0b2639;">Control de Proveedores</h2>
                 <p class="text-muted m-0">Directorio privado de importadores, fabricantes y vinculación de catálogo.</p>
             </div>
-            <!-- 👇 ACTUALIZADO: TRES BOTONES EN FILA INCLUYENDO EXPORTACIÓN A EXCEL 👇 -->
             <div class="d-flex gap-2">
                 <button class="btn btn-outline-success rounded-pill fw-bold px-4 d-flex align-items-center" onclick="exportarDirectorioExcel()">
                     <i class="bi bi-file-earmark-excel me-2"></i> Exportar
@@ -112,7 +111,6 @@
             </div>
         </div>
 
-        <!-- BARRA DE BÚSQUEDA PRINCIPAL DE PROVEEDORES (NOMBRE Y PRODUCTO) -->
         <div class="row mb-5">
             <div class="col-12 col-md-6 col-lg-5">
                 <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-white">
@@ -130,7 +128,7 @@
     </main>
 
     <div class="modal fade" id="modalProveedor" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content rounded-4 border-0 shadow">
                 <div class="modal-header bg-light border-0">
                     <h5 class="modal-title fw-bold text-dark" id="modalTitulo">Registrar Nuevo Proveedor</h5>
@@ -148,20 +146,57 @@
                                 <input type="text" class="form-control bg-light border-0" id="provContacto" placeholder="Ej. Ing. Carlos Mendoza" required>
                             </div>
                         </div>
+                        
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Correo Electrónico</label>
+                                <label class="form-label small fw-bold text-muted text-uppercase">Correo Electrónico Principal</label>
                                 <input type="email" class="form-control bg-light border-0" id="provEmail" placeholder="proveedor@empresa.com" required>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Teléfono / WhatsApp</label>
+                                <label class="form-label small fw-bold text-muted text-uppercase">Teléfono / WhatsApp Principal</label>
                                 <input type="tel" class="form-control bg-light border-0" id="provTelefono" placeholder="+52 55 1234 5678" required>
                             </div>
                         </div>
+
+                        <div class="d-flex gap-2 mb-3">
+                            <button type="button" id="btnAgregarEmailSec" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold px-3" onclick="toggleCampoOpcional('wrapperEmailSecundario', this, '¿Agregar otro correo?')">
+                                <i class="bi bi-envelope-plus me-1"></i> ¿Agregar otro correo?
+                            </button>
+                            <button type="button" id="btnAgregarTelSec" class="btn btn-sm btn-outline-secondary rounded-pill fw-bold px-3" onclick="toggleCampoOpcional('wrapperTelefonoSecundario', this, '¿Agregar otro celular?')">
+                                <i class="bi bi-telephone-plus me-1"></i> ¿Agregar otro celular?
+                            </button>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3 d-none" id="wrapperEmailSecundario">
+                                <label class="form-label small fw-bold text-muted text-uppercase text-secondary">Correo Secundario</label>
+                                <div class="input-group">
+                                    <input type="email" class="form-control bg-light border-0" id="provEmailSecundario" placeholder="contacto@empresa.com">
+                                    <button class="btn btn-outline-danger border-0 bg-light" type="button" onclick="removerCampoOpcional('wrapperEmailSecundario', 'provEmailSecundario', 'btnAgregarEmailSec', '¿Agregar otro correo?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3 d-none" id="wrapperTelefonoSecundario">
+                                <label class="form-label small fw-bold text-muted text-uppercase text-secondary">Celular Secundario</label>
+                                <div class="input-group">
+                                    <input type="tel" class="form-control bg-light border-0" id="provTelefonoSecundario" placeholder="+52 55 8765 4321">
+                                    <button class="btn btn-outline-danger border-0 bg-light" type="button" onclick="removerCampoOpcional('wrapperTelefonoSecundario', 'provTelefonoSecundario', 'btnAgregarTelSec', '¿Agregar otro celular?')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3" id="wrapperRfc">
+                                <label class="form-label small fw-bold text-muted text-uppercase text-secondary">RFC de la Empresa (Opcional)</label>
+                                <input type="text" class="form-control bg-light border-0 text-uppercase" id="provRfc" placeholder="XAXX010101000" maxlength="13">
+                            </div>
+                        </div>
+
                         <div class="mb-3">
                             <label class="form-label small fw-bold text-muted text-uppercase">Dirección Física / Bodega</label>
                             <input type="text" class="form-control bg-light border-0" id="provDireccion" placeholder="Calle, Número, Parque Industrial, Ciudad">
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label small fw-bold text-muted text-uppercase mb-2">Productos que Distribuye</label>
                             <div class="input-group input-group-sm mb-2 shadow-sm rounded-pill overflow-hidden border">
@@ -169,7 +204,7 @@
                                 <input type="text" id="buscarProductoModal" class="form-control border-0 shadow-none ps-1" placeholder="Buscar compuesto químico en el catálogo..." onkeyup="filtrarProductosModal()">
                             </div>
                             <div class="d-flex flex-wrap gap-1 mb-3" id="contenedorFiltrosModal">
-                                <button type="button" class="btn btn-outline-dark btn-sm btn-filtro-modal active" onclick="filtrarPorCategoriaModal('', this)">Todos</button>
+                                <button type="button" class="btn btn-outline-dark btn-sm btn-filtro-modal active" onclick="filtrarPorGridModal('', this)">Todos</button>
                                 <button type="button" class="btn btn-outline-dark btn-sm btn-filtro-modal" onclick="filtrarPorCategoriaModal('Farmacéutica', this)"><i class="bi bi-capsule text-primary me-1"></i> Farma</button>
                                 <button type="button" class="btn btn-outline-dark btn-sm btn-filtro-modal" onclick="filtrarPorCategoriaModal('Alimentos', this)"><i class="bi bi-egg-fried text-success me-1"></i> Alimentos</button>
                                 <button type="button" class="btn btn-outline-dark btn-sm btn-filtro-modal" onclick="filtrarPorCategoriaModal('Cosmética', this)"><i class="bi bi-stars text-danger me-1"></i> Cosmética</button>
@@ -245,7 +280,6 @@
         </footer>
     </div>
 
-    <!-- 👇 LIBRERÍA EXTERNA PARA GENERACIÓN DE EXCEL EN NAVEGADOR INSTALADA 👇 -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/proveedores.js"></script>
