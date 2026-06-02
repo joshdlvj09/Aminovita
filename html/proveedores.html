@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <link rel="icon" href="../assets/img/iconos/Logo aminovita.png" type="png">
+    <link rel="icon" href="../assets/img/iconos/AMINOVITA_A.png" type="png">
 
     <style>
         .cat-farmaceutica { border-left: 4px solid #8A8AF6 !important; }
@@ -98,7 +98,11 @@
                 <h2 class="display-6 fw-bold" style="color: #0b2639;">Control de Proveedores</h2>
                 <p class="text-muted m-0">Directorio privado de importadores, fabricantes y vinculación de catálogo.</p>
             </div>
+            <!-- 👇 ACTUALIZADO: TRES BOTONES EN FILA INCLUYENDO EXPORTACIÓN A EXCEL 👇 -->
             <div class="d-flex gap-2">
+                <button class="btn btn-outline-success rounded-pill fw-bold px-4 d-flex align-items-center" onclick="exportarDirectorioExcel()">
+                    <i class="bi bi-file-earmark-excel me-2"></i> Exportar
+                </button>
                 <a href="./cotizador-masivo.html" class="btn btn-outline-dark rounded-pill fw-bold px-4 d-flex align-items-center">
                     <i class="bi bi-send-check me-2"></i> Cotizar
                 </a>
@@ -108,7 +112,7 @@
             </div>
         </div>
 
-        <!-- 👇 NUEVO: BARRA DE BÚSQUEDA PRINCIPAL DE PROVEEDORES (NOMBRE Y PRODUCTO) 👇 -->
+        <!-- BARRA DE BÚSQUEDA PRINCIPAL DE PROVEEDORES (NOMBRE Y PRODUCTO) -->
         <div class="row mb-5">
             <div class="col-12 col-md-6 col-lg-5">
                 <div class="input-group shadow-sm border rounded-pill overflow-hidden bg-white">
@@ -241,7 +245,10 @@
         </footer>
     </div>
 
+    <!-- 👇 LIBRERÍA EXTERNA PARA GENERACIÓN DE EXCEL EN NAVEGADOR INSTALADA 👇 -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/proveedores.js"></script>
 </body>
+
 </html>

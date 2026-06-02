@@ -5,8 +5,11 @@
 
 let idProveedorEdicion = null; // Almacena el ID si estamos editando
 let listaProductosGlobal = [];  // Caché local para filtrar los productos en el modal
-let listaProveedoresGlobal = []; // 👇 NUEVO: Caché local para el buscador principal de la página
+let listaProveedoresGlobal = []; // Caché local para el buscador principal de la página
 let categoriaModalActual = '';  // Almacena la categoría activa dentro del modal
+
+// 👇 NUEVA: Almacena temporalmente los nombres de compuestos desabastecidos para el modal interactivo
+let productosDesabastecidosNombres = []; 
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Bloqueo estricto de seguridad en el Frontend
@@ -52,6 +55,128 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
+// --- 👇 FUNCIÓN DEL DASHBOARD OPTIMIZADA CON CLIC INTERACTIVO 👇 ---
+function renderizarMetricasDashboard() {
+    const contenedorProveedores = document.getElementById('contenedor-proveedores');
+    if (!contenedorProveedores) return;
+
+    let contenedorDashboard = document.getElementById('dashboard-metricas-admin');
+    if (!contenedorDashboard) {
+        contenedorDashboard = document.createElement('div');
+        contenedorDashboard.id = 'dashboard-metricas-admin';
+        contenedorDashboard.className = 'row g-3 mb-4';
+        contenedorProveedores.parentNode.insertBefore(contenedorDashboard, contenedorProveedores);
+    }
+
+    const totalProductos = listaProductosGlobal.length;
+    const totalProveedores = listaProveedoresGlobal.length;
+
+    // Obtener IDs de todos los productos vinculados a algún proveedor
+    const idsProductosConProveedor = new Set();
+    listaProveedoresGlobal.forEach(prov => {
+        if (prov.productos && prov.productos.length > 0) {
+            prov.productos.forEach(p => {
+                const idProd = typeof p === 'object' ? p._id : p;
+                if (idProd) idsProductosConProveedor.add(idProd.toString());
+            });
+        }
+    });
+
+    // 👇 MODIFICADO: Reiniciamos la lista de desabasto y guardamos sus títulos
+    productosDesabastecidosNombres = [];
+    listaProductosGlobal.forEach(p => {
+        if (p._id && !idsProductosConProveedor.has(p._id.toString())) {
+            productosDesabastecidosNombres.push(p.titulo);
+        }
+    });
+
+    const productosSinProveedor = productosDesabastecidosNombres.length;
+
+    // Renderizar las 3 tarjetas ocupando simétricamente el espacio en pantallas grandes (col-lg-4)
+    contenedorDashboard.innerHTML = `
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm border-start border-4 border-primary bg-white h-100 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase text-muted fw-bold small mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Compuestos en Catálogo</h6>
+                        <span class="h3 fw-bold text-dark mb-0">${totalProductos}</span>
+                    </div>
+                    <div class="bg-light rounded p-2 text-primary">
+                        <i class="bi bi-box-seam fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-sm-6 col-lg-4">
+            <div class="card border-0 shadow-sm border-start border-4 border-success bg-white h-100 p-3">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase text-muted fw-bold small mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Proveedores Activos</h6>
+                        <span class="h3 fw-bold text-dark mb-0">${totalProveedores}</span>
+                    </div>
+                    <div class="bg-light rounded p-2 text-success">
+                        <i class="bi bi-people fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-12 col-lg-4">
+            <div class="card border-0 shadow-sm border-start border-4 border-danger bg-white h-100 p-3 transition-all" 
+                 onclick="mostrarDetalleDesabasto()" 
+                 style="cursor: pointer; transition: transform 0.2s;"
+                 onmouseenter="this.style.transform='translateY(-2px)'" 
+                 onmouseleave="this.style.transform='translateY(0)'">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <h6 class="text-uppercase text-muted fw-bold small mb-1" style="font-size: 0.7rem; letter-spacing: 0.5px;">Sin Proveedor Vinculado <i class="bi bi-info-circle ms-1 small"></i></h6>
+                        <span class="h3 fw-bold ${productosSinProveedor > 0 ? 'text-danger' : 'text-dark'} mb-0">${productosSinProveedor}</span>
+                    </div>
+                    <div class="bg-light rounded p-2 text-danger">
+                        <i class="bi bi-exclamation-triangle fs-4"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+// --- 👇 NUEVA: DESPLEGAR VENTANA CON LA LISTA DE COMPUESTOS FALTANTES 👇 ---
+function mostrarDetalleDesabasto() {
+    if (productosDesabastecidosNombres.length === 0) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Cadena de Suministro Completa',
+            text: '¡Excelente! Todas las materias primas del catálogo tienen al menos un proveedor asociado.',
+            heightAuto: false
+        });
+        return;
+    }
+
+    // Construir renglones estilizados para enlistar las materias primas
+    const listaHtml = productosDesabastecidosNombres
+        .map(nombre => `<div class="text-start p-2 mb-2 bg-light rounded border-start border-3 border-danger fw-bold text-dark small"><i class="bi bi-patch-exclamation text-danger me-2"></i>${nombre}</div>`)
+        .join('');
+
+    Swal.fire({
+        title: '<span class="fw-bold" style="color:#0b2639;">Alertas de Suministro</span>',
+        html: `
+            <p class="text-muted small text-start mb-3">Las siguientes materias primas están registradas en el catálogo público pero no están vinculadas a ningún importador o fabricante:</p>
+            <div class="overflow-y-auto px-1" style="max-height: 250px;">
+                ${listaHtml}
+            </div>
+        `,
+        confirmButtonText: '<i class="bi bi-send-check me-2"></i>Ir a Cotizar ',
+        confirmButtonColor: '#0b2639',
+        showCancelButton: true,
+        cancelButtonText: 'Cerrar',
+        heightAuto: false
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = './cotizador-masivo.html';
+        }
+    });
+}
+
 // --- 1. LLENAR CONTENEDOR CON CHECKBOXES ESTILIZADOS (CON LOGOS) ---
 async function cargarProductosEnCheckboxes() {
     const contenedor = document.getElementById('contenedorCheckboxesProductos');
@@ -63,10 +188,10 @@ async function cargarProductosEnCheckboxes() {
         });
         const data = await res.json();
         
-        // Guardar en la variable global para el buscador del modal
         listaProductosGlobal = data.productos || data;
         
         renderizarCheckboxesModal(listaProductosGlobal);
+        renderizarMetricasDashboard();
     } catch (error) {
         console.error("Error al cargar productos para el selector:", error);
         contenedor.innerHTML = `<span class="text-danger small"><i class="bi bi-exclamation-triangle"></i> Error al cargar catálogo</span>`;
@@ -78,7 +203,6 @@ function renderizarCheckboxesModal(productos) {
     const contenedor = document.getElementById('contenedorCheckboxesProductos');
     if (!contenedor) return;
 
-    // Almacenar temporalmente los IDs que ya están marcados por el usuario antes de limpiar el HTML
     const marcadosPreviamente = Array.from(document.querySelectorAll('.chk-producto:checked')).map(chk => chk.value);
 
     if (productos.length === 0) {
@@ -92,37 +216,29 @@ function renderizarCheckboxesModal(productos) {
         let claseCat = 'border-secondary';
         let icono = 'bi-box-seam';
         
-        // Aseguramos procesar las categorías como array límpio
-        const categoriasArray = Array.isArray(p.categoria) ? p.categoria : (p.categoria ? [p.categoria] : []);
-        const categoriasTexto = categoriasArray.join(' ').toLowerCase();
+        const textCatArray = Array.isArray(p.categoria) ? p.categoria : (p.categoria ? [p.categoria] : []);
+        const categoriasTexto = textCatArray.join(' ').toLowerCase();
 
-        // LÓGICA COPIADA DEL CATÁLOGO: Si tiene más de una industria y estamos en "Todos", es "Varios"
-        if (categoriasArray.length > 1 && categoriaModalActual === '') {
+        if (textCatArray.length > 1 && categoriaModalActual === '') {
             claseCat = 'cat-varios';
             icono = 'bi-layers-half';
         } else {
-            // Si hay filtro activo o es categoría única, evaluamos de manera forzada para la mutación adaptativa
             const catEval = (categoriaModalActual !== '') ? categoriaModalActual.toLowerCase() : categoriasTexto;
 
             if (catEval.includes('farma')) {
-                claseCat = 'cat-farmaceutica';
-                icono = 'bi-capsule';
+                claseCat = 'cat-farmaceutica'; icono = 'bi-capsule';
             } else if (catEval.includes('alim')) {
-                claseCat = 'cat-alimentos';
-                icono = 'bi-egg-fried';
+                claseCat = 'cat-alimentos'; icono = 'bi-egg-fried';
             } else if (catEval.includes('cosm')) {
-                claseCat = 'cat-cosmetica';
-                icono = 'bi-stars';
+                claseCat = 'cat-cosmetica'; icono = 'bi-stars';
             } else if (catEval.includes('veterin') || catEval.includes('vet') || catEval.includes('anim')) { 
-                claseCat = 'cat-veterinario';
-                icono = 'bi-heart-pulse'; 
+                claseCat = 'cat-veterinario'; icono = 'bi-heart-pulse'; 
             } else if (catEval.includes('agro')) {      
-                claseCat = 'cat-agroquimico';
-                icono = 'bi-tree';
+                claseCat = 'cat-agroquimico'; icono = 'bi-tree';
             }
         }
 
-        const textoCategorias = categoriasArray.join(', ') || 'General';
+        const textoCategorias = textCatArray.join(', ') || 'General';
         const estaMarcado = marcadosPreviamente.includes(p._id) ? 'checked' : '';
 
         contenedor.innerHTML += `
@@ -148,21 +264,18 @@ function renderizarCheckboxesModal(productos) {
 function filtrarPorCategoriaModal(categoria, btnElement) {
     document.querySelectorAll('.btn-filtro-modal').forEach(btn => btn.classList.remove('active'));
     btnElement.classList.add('active');
-    
     categoriaModalActual = categoria;
-    filtrarProductosModal(); // Re-evalúa combinando la categoría y lo que esté escrito en el buscador
+    filtrarProductosModal(); 
 }
 
-// --- 3. BUSCADOR INTEGRADO EN TIEMPO REAL DEL MODAL (TEXTO + BOTONES DE CATEGORÍA) ---
+// --- 3. BUSCADOR INTEGRADO EN TIEMPO REAL DEL MODAL ---
 function filtrarProductosModal() {
     const texto = document.getElementById('buscarProductoModal').value.toLowerCase();
     
     const productosFiltrados = listaProductosGlobal.filter(p => {
         const tituloMatch = p.titulo.toLowerCase().includes(texto);
-        
-        const categoriasTexto = Array.isArray(p.categoria) 
-            ? p.categoria.join(' ').toLowerCase() 
-            : (p.categoria ? p.toLowerCase() : '');
+        const textCatArray = Array.isArray(p.categoria) ? p.categoria : (p.categoria ? [p.categoria] : []);
+        const categoriasTexto = textCatArray.join(' ').toLowerCase();
             
         const textoMatchCategoria = categoriasTexto.includes(texto);
         const coincideBuscadorTexto = tituloMatch || textoMatchCategoria;
@@ -191,11 +304,10 @@ async function cargarProveedores() {
         
         if (!res.ok) throw new Error('No se pudo obtener la lista de proveedores');
         
-        // 👇 MODIFICADO: Guardamos la respuesta original completa en nuestra caché local
         listaProveedoresGlobal = await res.json();
         
-        // Renderizamos las tarjetas usando la función unificada
         renderizarTarjetasProveedores(listaProveedoresGlobal);
+        renderizarMetricasDashboard();
 
     } catch (error) {
         console.error(error);
@@ -207,7 +319,7 @@ async function cargarProveedores() {
     }
 }
 
-// --- 👇 NUEVA: FUNCIÓN REFACTORIZADA PARA RENDERIZAR TARJETAS EN PANTALLA PRINCIPAL 👇 ---
+// --- FUNCIÓN PARA RENDERIZAR TARJETAS EN PANTALLA PRINCIPAL ---
 function renderizarTarjetasProveedores(proveedores) {
     const contenedor = document.getElementById('contenedor-proveedores');
     if (!contenedor) return;
@@ -262,7 +374,7 @@ function renderizarTarjetasProveedores(proveedores) {
     });
 }
 
-// --- 👇 NUEVA: MOTOR DE BÚSQUEDA GLOBAL (EMPRESA, AGENTE O PRODUCTO VINCULADO) 👇 ---
+// --- MOTOR DE BÚSQUEDA GLOBAL (EMPRESA, AGENTE O PRODUCTO VINCULADO) ---
 function buscarProveedoresGlobal() {
     const texto = document.getElementById('inputBusquedaProveedores').value.toLowerCase().trim();
     
@@ -275,7 +387,6 @@ function buscarProveedoresGlobal() {
         const coincideEmpresa = prov.empresa.toLowerCase().includes(texto);
         const coincideContacto = prov.contacto.toLowerCase().includes(texto);
         
-        // Evaluar si alguno de sus productos asignados coincide con el texto escrito
         const coincideProducto = prov.productos && prov.productos.some(p => {
             const tituloProd = (typeof p === 'object' && p.titulo) ? p.titulo.toLowerCase() : '';
             return tituloProd.includes(texto);
@@ -436,5 +547,83 @@ async function eliminarProveedorReal(id) {
             console.error(error);
             Swal.fire('Error', 'Error de red o conexión al backend', 'error');
         }
+    }
+}
+// --- 👇 NUEVA: EXPORTACIÓN DEL DIRECTORIO COMPLETO A UN ARCHIVO EXCEL (XLSX) 👇 ---
+function exportarDirectorioExcel() {
+    if (!listaProveedoresGlobal || listaProveedoresGlobal.length === 0) {
+        Swal.fire({
+            icon: 'warning',
+            title: 'Operación no disponible',
+            text: 'No hay registros de proveedores cargados en el sistema para exportar.',
+            heightAuto: false
+        });
+        return;
+    }
+
+    // Mostrar alerta de carga rápida
+    Swal.fire({
+        title: 'Generando Reporte...',
+        text: 'Estructurando base de datos de suministro.',
+        didOpen: () => Swal.showLoading(),
+        heightAuto: false
+    });
+
+    // 1. Mapear y aplanar la estructura del JSON para que las columnas de Excel queden perfectas
+    const datosEstructurados = listaProveedoresGlobal.map((prov, index) => {
+        // Unificar los nombres de los productos del proveedor en una sola celda separados por comas
+        const productosTexto = prov.productos && prov.productos.length > 0
+            ? prov.productos.map(p => typeof p === 'object' ? p.titulo : p).join(', ')
+            : 'Ninguno vinculado';
+
+        return {
+            'N°': index + 1,
+            'Empresa': prov.empresa,
+            'Contacto / Agente': prov.contacto,
+            'Correo Electrónico': prov.email,
+            'Teléfono / WhatsApp': prov.telefono,
+            'Dirección Física / Bodega': prov.direccion || 'No especificada',
+            'Insumos que Suministra': productosTexto
+        };
+    });
+
+    try {
+        // 2. Crear un libro de trabajo vacío (Workbook)
+        const wb = XLSX.utils.book_new();
+
+        // 3. Convertir nuestro JSON estructurado en una hoja de cálculo (Worksheet)
+        const ws = XLSX.utils.json_to_sheet(datosEstructurados);
+
+        // Ajustar visualmente el ancho de las columnas de forma automática para evitar texto cortado en Excel
+        const anchosColumnas = Object.keys(datosEstructurados[0]).map(key => ({
+            wch: Math.max(key.length + 2, ...datosEstructurados.map(row => (row[key] ? row[key].toString().length + 2 : 10)))
+        }));
+        ws['!cols'] = anchosColumnas;
+
+        // 4. Adjuntar la hoja al libro de trabajo asignándole un nombre
+        XLSX.utils.book_append_sheet(wb, ws, "Directorio Proveedores");
+
+        // 5. Forzar la descarga nativa del archivo binario .xlsx en el navegador
+        XLSX.writeFile(wb, "Directorio_Proveedores_Aminovita.xlsx");
+
+        Swal.close();
+        Swal.fire({
+            icon: 'success',
+            title: 'Reporte Descargado',
+            text: 'El directorio se exportó con éxito en formato Excel (.xlsx).',
+            timer: 1500,
+            showConfirmButton: false,
+            heightAuto: false
+        });
+
+    } catch (error) {
+        console.error("Error al exportar a Excel:", error);
+        Swal.close();
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Exportación',
+            text: 'Ocurrió un fallo al intentar procesar el binario de SheetJS.',
+            heightAuto: false
+        });
     }
 }
