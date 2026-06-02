@@ -1,9 +1,14 @@
+// =======================================================
+// CONTROLADOR DE PRODUCTOS (MATERIAS PRIMAS MULTI-CATEGORÍA)
+// Archivo: backend/controllers/productoController.js
+// =======================================================
+
 const Producto = require('../models/product.js'); 
 
-// 1. OBTENER PRODUCTOS (CON BÚSQUEDA, PAGINACIÓN Y CATEGORÍAS 🔍)
+// 1. OBTENER PRODUCTOS (CON BÚSQUEDA, PAGINACIÓN Y MULTI-CATEGORÍAS 🔍)
 exports.obtenerProductos = async (req, res) => {
     const pagina = parseInt(req.query.page) || 1;
-    const limite = 24; // Aumentado a 24 porque el diseño sin fotos ocupa menos espacio
+    const limite = 24; // Manteniendo el límite óptimo para el diseño sin fotos
     
     // Capturamos el término de búsqueda y la categoría de la URL
     const busqueda = req.query.search || ''; 
@@ -18,15 +23,17 @@ exports.obtenerProductos = async (req, res) => {
         }
         
         if (categoria) {
-            query.categoria = categoria; // Agrega el filtro si se seleccionó una categoría
+            // 🛠️ CORRECCIÓN CLAVE: Como ahora 'categoria' en la BD es un arreglo [String],
+            // usamos $in para encontrar cualquier producto que contenga la categoría seleccionada.
+            query.categoria = { $in: [categoria] }; 
         }
 
         const productos = await Producto.find(query)
-            .sort({ titulo: 1 }) // Orden alfabético (A-Z), ideal para catálogos químicos
+            .sort({ titulo: 1 }) // Orden alfabético (A-Z)
             .skip((pagina - 1) * limite)
             .limit(limite);
 
-        // Contamos solo los documentos que coinciden para la paginación correcta
+        // Contamos los documentos que coinciden para calcular la paginación correcta
         const total = await Producto.countDocuments(query);
 
         res.json({
@@ -35,7 +42,7 @@ exports.obtenerProductos = async (req, res) => {
             paginaActual: pagina
         });
     } catch (error) {
-        console.error(error);
+        console.error("Error al obtener catálogo de productos:", error);
         res.status(500).json({ msg: "Error al obtener productos" });
     }
 };
@@ -43,11 +50,12 @@ exports.obtenerProductos = async (req, res) => {
 // 2. CREAR UN PRODUCTO
 exports.crearProducto = async (req, res) => {
     try {
+        // Mongoose recibirá el arreglo de strings directo desde req.body.categoria
         const nuevoProducto = new Producto(req.body);
         await nuevoProducto.save();
         res.json({ msg: "Producto agregado correctamente", producto: nuevoProducto });
     } catch (error) {
-        console.error(error);
+        console.error("Error al registrar producto:", error);
         res.status(500).json({ msg: "Error al guardar" });
     }
 };
@@ -66,10 +74,9 @@ exports.obtenerProductoPorId = async (req, res) => {
     }
 };
 
-// 4. ACTUALIZAR PRODUCTO
+// 4. ACTUALIZAR PRODUCTO (SOPORTE COMPLETO PARA ARREGLOS)
 exports.actualizarProducto = async (req, res) => {
     try {
-        // Extraemos los campos, incluyendo 'categoria' en lugar de 'imagen'
         const { titulo, descripcion, categoria, notas } = req.body;
         let producto = await Producto.findById(req.params.id);
 
@@ -77,19 +84,28 @@ exports.actualizarProducto = async (req, res) => {
             return res.status(404).json({ msg: 'No existe el producto' });
         }
 
-        // Actualizamos los campos
+        // Actualizamos los campos validando la existencia de datos entrantes
         producto.titulo = titulo || producto.titulo;
         producto.descripcion = descripcion || producto.descripcion;
-        producto.categoria = categoria || producto.categoria;
+        
+        // Asignamos la categoría directamente si viene en la petición (ya mapeada como array)
+        if (categoria) {
+            producto.categoria = categoria;
+        }
+        
         producto.notas = notas; 
 
-        // new: true nos devuelve el producto ya actualizado
-        producto = await Producto.findByIdAndUpdate(req.params.id, producto, { new: true });
+        // Actualizamos de manera atómica en MongoDB Atlas
+        producto = await Producto.findByIdAndUpdate(
+            req.params.id, 
+            { $set: producto }, 
+            { new: true }
+        );
         
-        res.json({ msg: "Producto actualizado", producto });
+        res.json({ msg: "Producto actualizado con éxito", producto });
 
     } catch (error) {
-        console.error(error);
+        console.error("Error al actualizar producto:", error);
         res.status(500).send('Error al actualizar');
     }
 };
