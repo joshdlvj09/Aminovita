@@ -1,6 +1,7 @@
 /* =====================================================
    AMINOVITA - Lógica Avanzada del Catálogo
    Página: productos.html
+   Archivo: ../assets/js/productos.js
    ===================================================== */
 
 let paginaActual = 1;
@@ -22,6 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (rol === 'admin') {
         const btnAdmin = document.getElementById('btnAdminAgregar');
         if(btnAdmin) btnAdmin.classList.remove('d-none');
+        
+        // 👇 Muestra el botón de exportación a Excel solo si es Administrador 👇
+        const btnExportar = document.getElementById('btnAdminExportar');
+        if(btnExportar) btnExportar.classList.remove('d-none');
     }
     cargarProductos(paginaActual);
     inicializarFormularioProducto(); // Inicializa el submit de forma segura al cargar el DOM
@@ -105,17 +110,17 @@ function renderizarProductos(productos) {
         const iconoHeart = esFavorito ? 'bi-heart-fill text-danger' : 'bi-heart';
 
         // Procesamos categorías como array
-        const categoriasArray = Array.isArray(prod.categoria) ? prod.categoria : (prod.categoria ? [prod.categoria] : []);
+        const categoriesArray = Array.isArray(prod.categoria) ? prod.categoria : (prod.categoria ? [prod.categoria] : []);
         
         let claseCat = 'cat-general';
         let iconCat = 'bi-box-seam';
 
         // --- LÓGICA DINÁMICA DE CATEGORÍA ---
-        if (categoriasArray.length > 1 && categoriaActual === '') {
+        if (categoriesArray.length > 1 && categoriaActual === '') {
             claseCat = 'cat-varios';
             iconCat = 'bi-layers-half'; 
         } else {
-            const catEval = (categoriaActual !== '') ? categoriaActual.toLowerCase() : categoriasArray.join(' ').toLowerCase();
+            const catEval = (categoriaActual !== '') ? categoriaActual.toLowerCase() : categoriesArray.join(' ').toLowerCase();
             
             if (catEval.includes('farma')) { 
                 claseCat = 'cat-farmaceutica'; iconCat = 'bi-capsule'; 
@@ -130,29 +135,31 @@ function renderizarProductos(productos) {
             }
         }
 
-        const textoCategorias = categoriasArray.join(' | ');
+        const textoCategorias = categoriesArray.join(' | ');
 
-        // Acumulamos el string en lugar de insertarlo directamente al DOM
+        // 👇 CORREGIDO: Inyección con justificación flex-space-between y blindaje anti-desbordamiento nativo 👇
         htmlAcumulado += `
         <div class="col-12 col-md-6 col-xl-4">
-            <div class="item-producto ${claseCat} p-3 d-flex align-items-center position-relative" style="min-height: 90px;">
+            <div class="item-producto ${claseCat} p-3 d-flex align-items-center justify-content-between position-relative" style="min-height: 100px;">
                 ${estaLogueado ? `
                 <button onclick="toggleLike('${prod._id}', this)" class="btn btn-link p-0 position-absolute top-0 end-0 m-2 border-0 text-decoration-none shadow-none" style="z-index: 5;">
                     <i class="${iconoHeart} fs-6"></i>
                 </button>` : ''}
 
-                <div class="icono-cat me-3 flex-shrink-0">
-                    <i class="${iconCat}"></i>
+                <div class="d-flex align-items-center gap-3 min-w-0 flex-grow-1" style="padding-right: 10px;">
+                    <div class="icono-cat flex-shrink-0">
+                        <i class="${iconCat}"></i>
+                    </div>
+                    
+                    <div class="min-w-0 flex-grow-1">
+                        <h6 class="fw-bold mb-1 text-truncate" style="color: #0b2639; font-size: 0.85rem; letter-spacing: 0.5px;" title="${prod.titulo}">${prod.titulo}</h6>
+                        <small class="text-muted d-block text-truncate" style="font-size: 0.72rem;" title="${textoCategorias}">${textoCategorias}</small>
+                    </div>
                 </div>
                 
-                <div class="flex-grow-1 min-w-0" style="padding-right: 15px;">
-                    <h6 class="fw-bold mb-1 text-truncate" style="color: #0b2639;" title="${prod.titulo}">${prod.titulo}</h6>
-                    <small class="text-muted d-block text-wrap" style="font-size: 0.75rem; line-height: 1.2; max-height: 2.8em; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;" title="${textoCategorias}">${textoCategorias}</small>
-                </div>
-                
-                <div class="ms-2 flex-shrink-0">
+                <div class="flex-shrink-0 ms-2">
                     ${esAdmin ? `
-                        <a href="./detalles.html?id=${prod._id}" class="btn btn-light btn-sm text-dark border shadow-sm"><i class="bi bi-gear-fill"></i></a>
+                        <a href="./detalles.html?id=${prod._id}" class="btn btn-light btn-sm text-dark border shadow-sm d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;"><i class="bi bi-gear-fill"></i></a>
                     ` : `
                         <button onclick="verDetallesCliente('${prod._id}', '${textoCategorias}', \`${prod.titulo}\`, \`${prod.descripcion}\`)" class="btn btn-light btn-sm text-primary fw-bold border shadow-sm">Ver</button>
                     `}
@@ -208,8 +215,6 @@ function renderizarPaginacion(total, actual) {
     paginacion.innerHTML = '';
     if(total <= 1) return; 
     
-    // Aquí se mantiene con += temporalmente porque son pocos elementos de paginación, 
-    // pero el core de la inyección masiva (los productos) ya quedó blindado.
     paginacion.innerHTML += `<li class="page-item ${actual===1?'disabled':''}"><button class="page-link shadow-none text-dark" onclick="cambiarPagina(${actual-1})">&laquo;</button></li>`;
     for(let i=1; i<=total; i++) {
         paginacion.innerHTML += `<li class="page-item ${i===actual?'active':''}"><button class="page-link shadow-none ${i===actual?'bg-dark border-dark':''}" onclick="cambiarPagina(${i})">${i}</button></li>`;
@@ -281,4 +286,96 @@ function inicializarFormularioProducto() {
             Swal.fire({ icon: 'error', title: 'Error', text: 'Error de conexión con el backend de Aminovita.' });
         }
     });
+}
+
+// --- 📊 EXPORTACIÓN DEL CATÁLOGO COMPLETO DE PRODUCTOS A EXCEL (XLSX) ---
+async function exportarProductosExcel() {
+    // 1. Bloqueo estricto de seguridad en el Frontend
+    const rol = localStorage.getItem('usuarioRol');
+    if (rol !== 'admin') {
+        Swal.fire({
+            icon: 'error',
+            title: 'Acceso Denegado',
+            text: 'No tienes los permisos administrativos requeridos para descargar el inventario químico de la empresa.',
+            confirmButtonText: 'Entendido',
+            heightAuto: false
+        });
+        return;
+    }
+
+    Swal.fire({
+        title: 'Generando Reporte...',
+        text: 'Consultando base de datos masiva de compuestos.',
+        didOpen: () => Swal.showLoading(),
+        heightAuto: false
+    });
+
+    try {
+        const res = await fetch('http://localhost:4000/api/productos?limit=1000', {
+            headers: { 'x-auth-token': localStorage.getItem('token') }
+        });
+        
+        if (!res.ok) throw new Error('Error al conectar con el servidor');
+        const data = await res.json();
+        
+        const productosAExportar = data.productos || data;
+
+        if (!productosAExportar || productosAExportar.length === 0) {
+            Swal.close();
+            Swal.fire({
+                icon: 'warning',
+                title: 'Operación Cancelada',
+                text: 'No se encontraron registros químicos en el catálogo para exportar.',
+                heightAuto: false
+            });
+            return;
+        }
+
+        // 2. Mapeo simétrico de las columnas deseadas para la hoja de Excel
+        const datosEstructurados = productosAExportar.map((prod, index) => {
+            const industriasTexto = Array.isArray(prod.categoria) 
+                ? prod.categoria.join(', ') 
+                : (prod.categoria || 'General');
+
+            return {
+                'N°': index + 1,
+                'Compuesto Químico / Materia Prima': prod.titulo,
+                'Industrias Asociadas (Categorías)': industriasTexto,
+                'Descripción Técnica / Notas de Suministro': prod.descripcion || 'Sin descripción disponible',
+                'ID Interno MongoDB': prod._id
+            };
+        });
+
+        // 3. Compilación binaria con la librería SheetJS
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.json_to_sheet(datosEstructurados);
+
+        const anchosColumnas = Object.keys(datosEstructurados[0]).map(key => ({
+            wch: Math.max(key.length + 2, ...datosEstructurados.map(row => (row[key] ? row[key].toString().length + 2 : 10)))
+        }));
+        ws['!cols'] = anchosColumnas;
+
+        XLSX.utils.book_append_sheet(wb, ws, "Catálogo Productos");
+        XLSX.writeFile(wb, "Catálogo_Productos_Aminovita.xlsx");
+
+        Swal.close();
+        Swal.fire({
+            icon: 'success',
+            title: 'Reporte Descargado',
+            text: 'El catálogo de materias primas se exportó con éxito (.xlsx).',
+            timer: 1500,
+            showConfirmButton: false,
+            heightAuto: false
+        });
+
+    } catch (error) {
+        console.error("Error al exportar a Excel:", error);
+        Swal.close();
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de Exportación',
+            text: 'Ocurrió un fallo en la comunicación o al compilar el binario de SheetJS.',
+            heightAuto: false
+        });
+    }
 }

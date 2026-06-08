@@ -20,6 +20,7 @@
             transition: all 0.2s ease;
             border: 1px solid #e9ecef;
             border-left: 4px solid #6c757d; 
+            overflow: hidden; /* 👇 Evita desbordamientos de cajas hijas 👇 */
         }
         .item-producto:hover {
             transform: translateX(5px);
@@ -56,6 +57,51 @@
 
         .btn-filtro { border-radius: 20px; font-size: 0.85rem; font-weight: bold; margin-right: 5px; margin-bottom: 5px;}
         .btn-filtro.active { background-color: #0b2639; color: white; border-color: #0b2639; }
+
+        /* =======================================================
+           🛡️ AGREGADO: CONTROL DE ESPACIOS FIJOS PARA EVITAR DESFASES
+           ======================================================= */
+        
+        /* 1. Restringe de manera rígida el ancho del bloque de textos para activar el text-truncate */
+        .item-producto .min-w-0.flex-grow-1 {
+            min-width: 0 !important;
+            max-width: calc(100% - 65px) !important; /* Reserva el espacio matemático para los botones sin empujarlos */
+        }
+
+        /* 2. Caja contenedora del botón con espacio anclado exacto */
+        .item-producto .flex-shrink-0.ms-2 {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            width: 55px !important; /* Evita que la caja colapse o crezca por culpa de Lux */
+            height: 100% !important;
+        }
+
+        /* 3. Destruye los márgenes y fuerza dimensiones exactas al botón de Engranaje (Admin) */
+        .item-producto .btn-light.btn-sm.text-dark {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 34px !important;
+            height: 34px !important;
+            border-radius: 6px !important;
+        }
+
+        /* 4. Destruye los márgenes y estabiliza el padding del botón "Ver" (Cliente) */
+        .item-producto .btn-light.btn-sm.text-primary {
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            margin: 0 !important;
+            padding: 6px 14px !important;
+            font-size: 0.72rem !important;
+            font-weight: bold !important;
+            border-radius: 6px !important;
+            text-transform: uppercase !important;
+            letter-spacing: 0.5px !important;
+        }
     </style>
 </head>
 
@@ -117,8 +163,13 @@
                             <button class="btn btn-light border-0" type="button" onclick="limpiarBusqueda()" id="btnLimpiar" style="display: none;"><i class="bi bi-x-lg"></i></button>
                         </div>
                     </div>
-                    <div class="col-lg-3 col-md-4 text-end">
-                        <button id="btnAdminAgregar" class="btn btn-success d-none shadow-sm w-100 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalProducto"><i class="bi bi-plus-lg me-1"></i> Agregar Producto</button>
+                    <div class="col-lg-3 col-md-4 text-end d-flex gap-2 justify-content-end">
+                        <button id="btnAdminExportar" class="btn btn-outline-success d-none shadow-sm w-100 rounded-pill fw-bold" onclick="exportarProductosExcel()">
+                            <i class="bi bi-file-earmark-excel me-1"></i> Exportar
+                        </button>
+                        <button id="btnAdminAgregar" class="btn btn-success d-none shadow-sm w-100 rounded-pill fw-bold" data-bs-toggle="modal" data-bs-target="#modalProducto">
+                            <i class="bi bi-plus-lg me-1"></i> Agregar Producto
+                        </button>
                     </div>
                 </div>
                 <div class="row mb-4">
@@ -274,6 +325,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/auth.js"></script>
     <script src="../assets/js/productos.js"></script>
