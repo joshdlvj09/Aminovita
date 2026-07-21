@@ -106,6 +106,7 @@ function toggleCampoOpcional(wrapperId, btnElement, textoOriginal) {
     }
 }
 
+// --- REMOVER CAMPOS ---
 function removerCampoOpcional(wrapperId, inputId, btnId, textoOriginal) {
     const input = document.getElementById(inputId);
     const wrapper = document.getElementById(wrapperId);
@@ -247,7 +248,7 @@ async function cargarProductosEnCheckboxes() {
     if (!contenedor) return;
 
     try {
-        const res = await fetch('http://localhost:4000/api/productos', {
+        const res = await fetch('http://localhost:4000/api/productos?limit=1000', {
             headers: { 'x-auth-token': localStorage.getItem('token') }
         });
         const data = await res.json();
@@ -401,39 +402,41 @@ function renderizarTarjetasProveedores(proveedores) {
             ? prov.productos.map(p => `<span class="badge bg-light text-dark border small me-1 mb-1" style="font-weight: 600; font-size: 0.75rem;"><i class="bi bi-tag-fill text-secondary me-1"></i>${p.titulo}</span>`).join('')
             : '<span class="text-muted small">Ningún insumo químico vinculado</span>';
 
-        // Renderizar condicionalmente el bloque de RFC y datos alternos si existen
         const badgeRfc = prov.rfc ? `<div class="mt-1 small fw-bold text-dark"><span class="badge bg-dark text-white border-0" style="font-size:0.65rem; padding: 3px 6px;"><i class="bi bi-hash me-1 text-warning"></i>RFC: ${prov.rfc}</span></div>` : '';
         const correoAlternoHtml = prov.emailSecundario ? `<div class="mb-1 text-truncate"><i class="bi bi-envelope text-muted me-2"></i>Alt: ${prov.emailSecundario}</div>` : '';
         const telefonoAlternoHtml = prov.telefonoSecundario ? `<div class="mb-1"><i class="bi bi-telephone text-muted me-2"></i>Cel: ${prov.telefonoSecundario}</div>` : '';
 
         contenedor.innerHTML += `
-            <div class="col-md-6">
-                <div class="tarjeta-proveedor p-4 bg-white border rounded shadow-sm position-relative mb-3">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div class="min-w-0 flex-grow-1">
-                            <h4 class="fw-bold text-dark mb-0 text-truncate" style="letter-spacing: -0.5px;">${prov.empresa}</h4>
-                            ${badgeRfc}
-                            <span class="small text-muted d-block mt-1"><i class="bi bi-person me-1"></i> Agente: ${prov.contacto}</span>
+            <div class="col-md-6 mb-3">
+                <div class="tarjeta-proveedor p-4 bg-white border rounded shadow-sm position-relative h-100 d-flex flex-column justify-content-between">
+                    <div>
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <div class="min-w-0 flex-grow-1">
+                                <h4 class="fw-bold text-dark mb-0 text-truncate" style="letter-spacing: -0.5px;">${prov.empresa}</h4>
+                                ${badgeRfc}
+                                <span class="small text-muted d-block mt-1"><i class="bi bi-person me-1"></i> Agente: ${prov.contacto}</span>
+                            </div>
+                            <div class="d-flex gap-1 flex-shrink-0">
+                                <button class="btn btn-sm btn-outline-secondary border-0" onclick="prepararModificacion('${prov._id}')">
+                                    <i class="bi bi-pencil-square text-dark"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger border-0" onclick="eliminarProveedorReal('${prov._id}')">
+                                    <i class="bi bi-trash text-danger"></i>
+                                </button>
+                            </div>
                         </div>
-                        <div class="d-flex gap-1 flex-shrink-0">
-                            <button class="btn btn-sm btn-outline-secondary border-0" onclick="prepararModificacion('${prov._id}')">
-                                <i class="bi bi-pencil-square text-dark"></i>
-                            </button>
-                            <button class="btn btn-sm btn-outline-danger border-0" onclick="eliminarProveedorReal('${prov._id}')">
-                                <i class="bi bi-trash text-danger"></i>
-                            </button>
+                        <div class="small text-secondary mb-3 pt-1">
+                            <div class="mb-1 text-truncate"><i class="bi bi-envelope-fill me-2 text-primary"></i> ${prov.email || 'No registrado'}</div>
+                            ${correoAlternoHtml}
+                            <div class="mb-1"><i class="bi bi-telephone-fill me-2 text-success"></i> ${prov.telefono || 'No registrado'}</div>
+                            ${telefonoAlternoHtml}
+                            <div class="text-truncate"><i class="bi bi-geo-alt-fill me-2 text-muted"></i> ${prov.direccion || 'Dirección no especificada'}</div>
                         </div>
                     </div>
-                    <div class="small text-secondary mb-3 pt-1">
-                        <div class="mb-1 text-truncate"><i class="bi bi-envelope-fill me-2 text-primary"></i> ${prov.email}</div>
-                        ${correoAlternoHtml}
-                        <div class="mb-1"><i class="bi bi-telephone-fill me-2 text-success"></i> ${prov.telefono}</div>
-                        ${telefonoAlternoHtml}
-                        <div class="text-truncate"><i class="bi bi-geo-alt-fill me-2 text-muted"></i> ${prov.direccion || 'Dirección no especificada'}</div>
-                    </div>
-                    <div class="border-top pt-3">
+                    
+                    <div class="border-top pt-3 mt-auto">
                         <h6 class="small fw-bold text-muted text-uppercase mb-2" style="font-size: 0.7rem; letter-spacing: 0.5px;">Insumos que Suministra:</h6>
-                        <div class="d-flex flex-wrap">
+                        <div class="d-flex flex-wrap overflow-y-auto" style="max-height: 110px; padding-right: 4px;">
                             ${badgesProductos}
                         </div>
                     </div>
@@ -443,7 +446,7 @@ function renderizarTarjetasProveedores(proveedores) {
     });
 }
 
-// --- MOTOR DE BÚSQUEDA GLOBAL (EMPRESA, AGENTE O PRODUCTO VINCULADO) ---
+// --- MOTOR DE BÚSQUEDA GLOBAL ---
 function buscarProveedoresGlobal() {
     const texto = document.getElementById('inputBusquedaProveedores').value.toLowerCase().trim();
     
@@ -484,12 +487,13 @@ document.getElementById('formProveedor').addEventListener('submit', async (e) =>
 
     const productosSeleccionados = Array.from(document.querySelectorAll('.chk-producto:checked')).map(chk => chk.value);
 
+    // 👇 CORREGIDO: Ajustado el mapeo con fallback || '' para admitir campos vacíos sin reventar Mongoose 👇
     const datosProveedor = {
         empresa: document.getElementById('provEmpresa').value,
         contacto: document.getElementById('provContacto').value,
-        email: document.getElementById('provEmail').value,
-        telefono: document.getElementById('provTelefono').value,
-        direccion: document.getElementById('provDireccion').value,
+        email: document.getElementById('provEmail').value || '',
+        telefono: document.getElementById('provTelefono').value || '',
+        direccion: document.getElementById('provDireccion').value || '',
         productos: productosSeleccionados,
         emailSecundario: document.getElementById('provEmailSecundario').value || '',
         telefonoSecundario: document.getElementById('provTelefonoSecundario').value || '',
@@ -550,7 +554,7 @@ async function prepararModificacion(id) {
             headers: { 'x-auth-token': localStorage.getItem('token') }
         });
         
-        if (!res.ok) throw new Error('No se pudo obtener the detalle del proveedor');
+        if (!res.ok) throw new Error('No se pudo obtener el detalle del proveedor');
         const prov = await res.json();
         
         Swal.close();
@@ -560,15 +564,14 @@ async function prepararModificacion(id) {
 
         document.getElementById('provEmpresa').value = prov.empresa;
         document.getElementById('provContacto').value = prov.contacto;
-        document.getElementById('provEmail').value = prov.email;
-        document.getElementById('provTelefono').value = prov.telefono;
+        document.getElementById('provEmail').value = prov.email || '';
+        document.getElementById('provTelefono').value = prov.telefono || '';
         document.getElementById('provDireccion').value = prov.direccion || '';
 
         document.getElementById('provEmailSecundario').value = prov.emailSecundario || '';
         document.getElementById('provTelefonoSecundario').value = prov.telefonoSecundario || '';
         document.getElementById('provRfc').value = prov.rfc || '';
 
-        // Si hay datos secundarios guardados, expandir el contenedor opcional al editar
         if (prov.emailSecundario) {
             document.getElementById('wrapperEmailSecundario').classList.remove('d-none');
             const btn = document.getElementById('btnAgregarEmailSec');
@@ -610,7 +613,7 @@ async function prepararModificacion(id) {
     }
 }
 
-// --- 7. ELIMINAR PROVEEDOR DE LA BASE DE DATOS (DELETE) ---
+// --- 7. ELIMINAR PROVEEDOR ---
 async function eliminarProveedorReal(id) {
     const result = await Swal.fire({
         title: '¿Eliminar proveedor?',
@@ -676,9 +679,9 @@ function exportarDirectorioExcel() {
             'Empresa': prov.empresa,
             'RFC': prov.rfc || 'No registrado',
             'Contacto / Agente': prov.contacto,
-            'Correo Principal': prov.email,
+            'Correo Principal': prov.email || 'No registrado',
             'Correo Secundario': prov.emailSecundario || 'N/A',
-            'Teléfono Principal': prov.telefono,
+            'Teléfono Principal': prov.telefono || 'No registrado',
             'Celular Secundario': prov.telefonoSecundario || 'N/A',
             'Dirección Física / Bodega': prov.direccion || 'No especificada',
             'Insumos que Suministra': productosTexto
@@ -687,9 +690,8 @@ function exportarDirectorioExcel() {
 
     try {
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.json_to_sheet(datosEstructurados);
+        const ws = XLSX.utils.json_to_sheet(datosEstructuredos);
 
-        // 👇 CORREGIDO: Eliminamos el typo de asignación y mapeamos directamente sobre Object.keys 👇
         const anchosColumnas = Object.keys(datosEstructurados[0]).map(key => ({
             wch: Math.max(key.length + 2, ...datosEstructurados.map(row => (row[key] ? row[key].toString().length + 2 : 10)))
         }));
