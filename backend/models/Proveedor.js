@@ -20,26 +20,31 @@ const ProveedorSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    // 👇 CORREGIDO: Cambiado a required: false para permitir registros opcionales 👇
     email: {
         type: String,
-        required: true,
+        required: false,
         trim: true,
-        lowercase: true
+        lowercase: true,
+        default: ''
     },
+    // 👇 CORREGIDO: Cambiado a required: false para permitir registros opcionales 👇
     telefono: {
         type: String,
-        required: true
+        required: false,
+        default: ''
     },
     direccion: {
         type: String,
-        trim: true
+        trim: true,
+        default: ''
     },
     // Vinculación: Guardamos un arreglo de IDs que apunta a 'Product'
     productos: [{
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Product' // 👈 CAMBIADO A 'Product' para coincidir exactamente con tu modelo
+        ref: 'Product' // 👈 Coincide exactamente con tu modelo de compuestos
     }],
-    // 👇 NUEVOS CAMPOS ADICIONALES Y FISCALES (OPCIONALES) 👇
+    // CAMPOS ADICIONALES Y FISCALES (OPCIONALES)
     emailSecundario: {
         type: String,
         trim: true,

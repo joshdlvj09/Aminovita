@@ -8,7 +8,9 @@ const Producto = require('../models/product.js');
 // 1. OBTENER PRODUCTOS (CON BÚSQUEDA, PAGINACIÓN Y MULTI-CATEGORÍAS 🔍)
 exports.obtenerProductos = async (req, res) => {
     const pagina = parseInt(req.query.page) || 1;
-    const limite = 24; // Manteniendo el límite óptimo para el diseño sin fotos
+    
+    // 👇 SOLUCIÓN: Si viene un 'limit' en la URL lo usa, de lo contrario cae en el default de 24 👇
+    const limite = parseInt(req.query.limit) || 24; 
     
     // Capturamos el término de búsqueda y la categoría de la URL
     const busqueda = req.query.search || ''; 
